@@ -823,6 +823,7 @@ static int computeCountersSampleSize(SFLReceiver *receiver, SFL_COUNTERS_SAMPLE_
     case SFLCOUNTERS_HOST_PAR: elemSiz = 8 /*sizeof(elem->counterBlock.host_par)*/;  break;
     case SFLCOUNTERS_ADAPTORS: elemSiz = adaptorListEncodingLength(elem->counterBlock.adaptors);  break;
     case SFLCOUNTERS_HOST_CPU: elemSiz = 80 /*sizeof(elem->counterBlock.host_cpu)*/;  break;
+    case SFLCOUNTERS_HOST_CACHE: elemSiz = 20 /*sizeof(elem->counterBlock.host_cpu)*/;  break;
     case SFLCOUNTERS_HOST_MEM: elemSiz = 72 /*sizeof(elem->counterBlock.host_mem)*/ ;  break;
     case SFLCOUNTERS_HOST_DSK: elemSiz = 52 /*sizeof(elem->counterBlock.host_dsk)*/;  break;
     case SFLCOUNTERS_HOST_NIO: elemSiz = 40 /*sizeof(elem->counterBlock.host_nio)*/;  break;
@@ -1000,6 +1001,13 @@ int sfl_receiver_writeCountersSample(SFLReceiver *receiver, SFL_COUNTERS_SAMPLE_
       putNet32(receiver, elem->counterBlock.host_cpu.cpu_steal);
       putNet32(receiver, elem->counterBlock.host_cpu.cpu_guest);
       putNet32(receiver, elem->counterBlock.host_cpu.cpu_guest_nice);
+      break;
+    case SFLCOUNTERS_HOST_CACHE:
+      putNet32(receiver, elem->counterBlock.host_cache.lcore);
+      putNet32(receiver, elem->counterBlock.host_cache.socket);
+      putNet32(receiver, elem->counterBlock.host_cache.cluster);
+      putNet32(receiver, elem->counterBlock.host_cache.mbl);
+      putNet32(receiver, elem->counterBlock.host_cache.mbr);
       break;
     case SFLCOUNTERS_HOST_MEM:
       putNet64(receiver, elem->counterBlock.host_mem.mem_total);
