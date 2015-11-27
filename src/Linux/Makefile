@@ -17,7 +17,7 @@ endif
 # base CFLAGS and LIBS
 SFLOWDIR=../sflow
 CACHEDIR=../cache
-CFLAGS += -I. -I$(SFLOWDIR) $(OPT) -Wall -Wstrict-prototypes -Wunused-value -D_GNU_SOURCE -DHSP_VERSION=$(VERSION) -DUTHEAP
+CFLAGS += -I. -I$(SFLOWDIR) -I$(CACHEDIR) $(OPT) -Wall -Wstrict-prototypes -Wunused-value -D_GNU_SOURCE -DHSP_VERSION=$(VERSION) -DUTHEAP
 LIBS += $(SFLOWDIR)/libsflow.a $(CACHEDIR)/libpqos.a -lresolv -lpthread
 
 # if ULOG is not set, assume it should be "yes" if the include file is present
@@ -228,6 +228,7 @@ endif
 
 READ_OBJS=readInterfaces.o \
           readCpuCounters.o \
+          readCacheCounters.o \
           readNvmlCounters.o \
           readMemoryCounters.o \
           readDiskCounters.o \
@@ -331,6 +332,7 @@ dnsSD.o: dnsSD.c $(HEADERS)
 hsflowd.o: hsflowd.c $(HEADERS)
 readInterfaces.o: readInterfaces.c $(HEADERS)
 readCpuCounters.o: readCpuCounters.c $(HEADERS)
+readCacheCounters.o: readCacheCounters.c $(HEADERS)
 readNvmlCounters.o: readNvmlCounters.c $(HEADERS)
 readMemoryCounters.o: readMemoryCounters.c $(HEADERS)
 readDiskCounters.o: readDiskCounters.c $(HEADERS)

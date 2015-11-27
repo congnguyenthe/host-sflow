@@ -380,7 +380,7 @@ extern "C" {
     // host cache counters
     SFLCounters_sample_element cacheElem = { 0 };
     cacheElem.tag = SFLCOUNTERS_HOST_CACHE;
-    if(readCpuCounters(&cpuElem.counterBlock.host_cache)) {
+    if(readCacheCounters(&cpuElem.counterBlock.host_cache)) {
       // remember speed and nprocs for other purposes
       //sp->cpu_cores = cpuElem.counterBlock.host_cpu.cpu_num;
       //sp->cpu_mhz = cpuElem.counterBlock.host_cpu.cpu_speed;

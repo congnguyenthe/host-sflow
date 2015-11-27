@@ -61,7 +61,7 @@ static int stop_monitoring_loop = 0;
  */
 static void monitoring_ctrlc(int signo)
 {
-	printf("\nExiting[%d]... Press Enter\n", signo);
+	myLog(LOG_ERR, "\nExiting[%d]... Press Enter\n", signo);
         stop_monitoring_loop = 1;
 }
 /**
@@ -105,7 +105,7 @@ get_event_factors(const struct pqos_cap * const cap,
         if (sel_events_max & PQOS_MON_EVENT_L3_OCCUP) {
                 ret = pqos_cap_get_event(cap, PQOS_MON_EVENT_L3_OCCUP, &l3mon);
                 if (ret != PQOS_RETVAL_OK) {
-                        printf("Failed to obtain LLC occupancy event data!\n");
+                        myLog(LOG_ERR, "Failed to obtain LLC occupancy event data!\n");
                         return PQOS_RETVAL_ERROR;
                 }
                 *llc_factor = ((double)l3mon->scale_factor) / 1024.0;
@@ -115,7 +115,7 @@ get_event_factors(const struct pqos_cap * const cap,
         if (sel_events_max & PQOS_MON_EVENT_RMEM_BW) {
                 ret = pqos_cap_get_event(cap, PQOS_MON_EVENT_RMEM_BW, &mbr_mon);
                 if (ret != PQOS_RETVAL_OK) {
-                        printf("Failed to obtain MBR event data!\n");
+                        myLog(LOG_ERR, "Failed to obtain MBR event data!\n");
                         return PQOS_RETVAL_ERROR;
                 }
                 *mbr_factor = ((double) mbr_mon->scale_factor)
@@ -126,7 +126,7 @@ get_event_factors(const struct pqos_cap * const cap,
         if (sel_events_max & PQOS_MON_EVENT_LMEM_BW) {
                 ret = pqos_cap_get_event(cap, PQOS_MON_EVENT_LMEM_BW, &mbl_mon);
                 if (ret != PQOS_RETVAL_OK) {
-                        printf("Failed to obtain MBL occupancy event data!\n");
+                        myLog(LOG_ERR, "Failed to obtain MBL occupancy event data!\n");
                         return PQOS_RETVAL_ERROR;
                 }
                 *mbl_factor = ((double)mbl_mon->scale_factor) / (1024.0*1024.0);
@@ -157,10 +157,10 @@ monitoring_get_input(int argc, char *argv[])
 	if (num_args == 0)
 		sel_monitor_num = 0;
 	else if (!strcmp(argv[1], "-h") || !strcmp(argv[1], "-H")) {
-		printf("Usage:  %s [<core1> <core2> <core3> ...]\n"
+		myLog(LOG_ERR, "Usage:  %s [<core1> <core2> <core3> ...]\n"
                        "        %s -p [<pid1> <pid2> <pid3> ...]\n",
                        argv[0], argv[0]);
-		printf("Eg   :  %s 1 2 6\n        "
+		myLog(LOG_ERR, "Eg   :  %s 1 2 6\n        "
                        "%s -p 3564 7638 356\n"
                        "Notes:\n        "
                        "-h      help\n        "
@@ -232,7 +232,7 @@ setup_monitoring(const struct pqos_cpuinfo *cpu_info,
                                              NULL,
                                              sel_monitor_core_tab[i].pgrp);
                         if (ret != PQOS_RETVAL_OK) {
-                                printf("Monitoring start error on core %u,"
+                                myLog(LOG_ERR, "Monitoring start error on core %u,"
                                        "status %d\n", lcore, ret);
                                 return ret;
                         }
@@ -246,7 +246,7 @@ setup_monitoring(const struct pqos_cpuinfo *cpu_info,
                                                  NULL,
                                                  sel_monitor_pid_tab[i].pgrp);
                         if (ret != PQOS_RETVAL_OK) {
-                                printf("Monitoring start error on pid %u,"
+                                myLog("Monitoring start error on pid %u,"
                                        "status %d\n", pid, ret);
                                 return ret;
                         }
@@ -272,7 +272,7 @@ static void stop_monitoring(void)
 
 		ret = pqos_mon_stop(m_mon_grps[i]);
 		if (ret != PQOS_RETVAL_OK)
-			printf("Monitoring stop error!\n");
+			myLog(LOG_ERR, "Monitoring stop error!\n");
                 free(m_mon_grps[i]);
 	}
 }
@@ -289,7 +289,7 @@ static void monitoring_loop(const struct pqos_cap *cap)
 	int i = 0;
 
 	if (signal(SIGINT, monitoring_ctrlc) == SIG_ERR)
-		printf("Failed to catch SIGINT!\n");
+		myLog(LOG_ERR, "Failed to catch SIGINT!\n");
 	ret = get_event_factors(cap, &llc_factor, &mbr_factor, &mbl_factor);
 	if (ret != PQOS_RETVAL_OK)
 		return;
@@ -299,47 +299,41 @@ static void monitoring_loop(const struct pqos_cap *cap)
 	else
 	        mon_number = (unsigned) sel_process_num;
 
-	while (!stop_monitoring_loop) {
-                ret = pqos_mon_poll(m_mon_grps, (unsigned)mon_number);
-                if (ret != PQOS_RETVAL_OK) {
-                        printf("Failed to poll monitoring data!\n");
-                        return;
-                }
-                if (!process_mode()) {
-                        printf("SOCKET     CORE     RMID    LLC[KB]"
-                               "    MBL[MB]    MBR[MB]\n");
-                        for (i = 0; i < sel_monitor_num; i++) {
-                                const struct pqos_event_values *pv =
-                                        &m_mon_grps[i]->values;
-                                double llc = (double)pv->llc,
-                                        mbr = (double)pv->mbm_remote_delta,
-                                        mbl = (double)pv->mbm_local_delta;
+    ret = pqos_mon_poll(m_mon_grps, (unsigned)mon_number);
+    if (ret != PQOS_RETVAL_OK) {
+        myLog(LOG_ERR, "Failed to poll monitoring data!\n");
+            return;
+    }
+    if (!process_mode()) {
+        myLog(LOG_ERR, "SOCKET     CORE     RMID    LLC[KB]"
+             "    MBL[MB]    MBR[MB]\n");
+        for (i = 0; i < sel_monitor_num; i++) {
+            const struct pqos_event_values *pv =
+                &m_mon_grps[i]->values;
+                double llc = (double)pv->llc,
+                mbr = (double)pv->mbm_remote_delta,
+                mbl = (double)pv->mbm_local_delta;
 
-                                printf("%6u %8u %8u %10.1f %10.1f %10.1f\n",
-                                       m_mon_grps[i]->socket,
-                                       m_mon_grps[i]->cores[0],
-                                       m_mon_grps[i]->rmid,
-                                       llc * llc_factor,
-                                       mbl * mbl_factor,
-                                       mbr * mbr_factor);
-                        }
-                } else {
-                        printf("PID       LLC[KB]\n");
-                        for (i = 0; i < sel_process_num; i++) {
-                                const struct pqos_event_values *pv =
-                                        &m_mon_grps[i]->values;
-                                double llc = (double)pv->llc;
+                myLog(LOG_ERR, "%6u %8u %8u %10.1f %10.1f %10.1f\n",
+                    m_mon_grps[i]->socket,
+                    m_mon_grps[i]->cores[0],
+                    m_mon_grps[i]->rmid,
+                    llc * llc_factor,
+                    mbl * mbl_factor,
+                    mbr * mbr_factor);
+        }
+    } else {
+        myLog(LOG_ERR, "PID       LLC[KB]\n");
+        for (i = 0; i < sel_process_num; i++) {
+            const struct pqos_event_values *pv =
+                &m_mon_grps[i]->values;
+                double llc = (double)pv->llc;
 
-                                printf("%6d %10.1f\n",
-                                       m_mon_grps[i]->pid,
-                                       llc * llc_factor);
-                        }
-                }
-		printf("\nPress Enter to continue or Ctrl+c to exit");
-		if (getchar() != '\n')
-			break;
-		printf("\e[1;1H\e[2J");
-	}
+                myLog(LOG_ERR, "%6d %10.1f\n",
+                    m_mon_grps[i]->pid,
+                    llc * llc_factor);
+        }
+    }
 }
 
 int readCacheCounters(SFLHost_cache_counters *cache) 
@@ -357,14 +351,14 @@ int readCacheCounters(SFLHost_cache_counters *cache)
 	/* PQoS Initialization - Check and initialize CAT and CMT capability */
 	ret = pqos_init(&config);
 	if (ret != PQOS_RETVAL_OK) {
-		printf("Error initializing PQoS library!\n");
+		myLog(LOG_ERR, "Error initializing PQoS library!\n");
 		exit_val = EXIT_FAILURE;
 		goto error_exit;
 	}
 	/* Get CMT capability and CPU info pointer */
 	ret = pqos_cap_get(&p_cap, &p_cpu);
 	if (ret != PQOS_RETVAL_OK) {
-		printf("Error retrieving PQoS capabilities!\n");
+		myLog(LOG_ERR, "Error retrieving PQoS capabilities!\n");
 		exit_val = EXIT_FAILURE;
 		goto error_exit;
 	}
@@ -374,17 +368,16 @@ int readCacheCounters(SFLHost_cache_counters *cache)
 	/* Setup the monitoring resources */
 	ret = setup_monitoring(p_cpu, cap_mon);
 	if (ret != PQOS_RETVAL_OK) {
-		printf("Error Setting up monitoring!\n");
+		myLog(LOG_ERR, "Error Setting up monitoring!\n");
                 exit_val = EXIT_FAILURE;
                 goto error_exit;
         }
 	/* Start Monitoring */
 	monitoring_loop(p_cap);
-	/* Stop Monitoring */
-	stop_monitoring();
+	myLog(LOG_INFO, "End!\n");
  error_exit:
 	ret = pqos_fini();
 	if (ret != PQOS_RETVAL_OK)
-		printf("Error shutting down PQoS library!\n");
+		myLog(LOG_ERR, "Error shutting down PQoS library!\n");
 	return exit_val;
 }

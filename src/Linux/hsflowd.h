@@ -603,6 +603,7 @@ extern "C" {
   // read functions
   int readInterfaces(HSP *sp, uint32_t *p_added, uint32_t *p_removed, uint32_t *p_cameup, uint32_t *p_wentdown, uint32_t *p_changed);
   int readCpuCounters(SFLHost_cpu_counters *cpu);
+  int readCacheCounters(SFLHost_cache_counters *cache);
   int readMemoryCounters(SFLHost_mem_counters *mem);
   int readDiskCounters(HSP *sp, SFLHost_dsk_counters *dsk);
   int readNioCounters(HSP *sp, SFLHost_nio_counters *nio, char *devFilter, SFLAdaptorList *adList);
