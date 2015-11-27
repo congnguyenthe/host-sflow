@@ -16,8 +16,9 @@ endif
 
 # base CFLAGS and LIBS
 SFLOWDIR=../sflow
+CACHEDIR=../cache
 CFLAGS += -I. -I$(SFLOWDIR) $(OPT) -Wall -Wstrict-prototypes -Wunused-value -D_GNU_SOURCE -DHSP_VERSION=$(VERSION) -DUTHEAP
-LIBS += $(SFLOWDIR)/libsflow.a -lresolv -lpthread
+LIBS += $(SFLOWDIR)/libsflow.a $(CACHEDIR)/libpqos.a -lresolv -lpthread
 
 # if ULOG is not set, assume it should be "yes" if the include file is present
 # (So you can use "make ULOG=no" to compile without this feature)

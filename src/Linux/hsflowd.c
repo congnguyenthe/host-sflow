@@ -377,6 +377,16 @@ extern "C" {
       SFLADD_ELEMENT(cs, &cpuElem);
     }
 
+    // host cache counters
+    SFLCounters_sample_element cacheElem = { 0 };
+    cacheElem.tag = SFLCOUNTERS_HOST_CACHE;
+    if(readCpuCounters(&cpuElem.counterBlock.host_cache)) {
+      // remember speed and nprocs for other purposes
+      //sp->cpu_cores = cpuElem.counterBlock.host_cpu.cpu_num;
+      //sp->cpu_mhz = cpuElem.counterBlock.host_cpu.cpu_speed;
+      SFLADD_ELEMENT(cs, &cacheElem);
+    }
+
 #ifdef HSF_NVML
     SFLCounters_sample_element nvmlElem = { 0 };
     nvmlElem.tag = SFLCOUNTERS_HOST_GPU_NVML;

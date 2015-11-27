@@ -769,6 +769,15 @@ typedef struct _SFLHost_cpu_counters {
   uint32_t cpu_guest_nice;  /* time spent running vcpu for "niced" guest OS */
 } SFLHost_cpu_counters;
 
+typedef struct _SFLHost_cache_counters{
+  uint32_t lcore;                 /**< logical core id */
+  uint32_t socket;                /**< socket id in the system */
+  uint32_t cluster; 
+  uint32_t mbl;
+  uint32_t mbr;
+  
+}SFLHost_cache_counters;
+
 typedef struct _SFLHost_mem_counters {
   uint64_t mem_total;    /* total bytes */
   uint64_t mem_free;     /* free bytes */
@@ -1114,13 +1123,14 @@ enum SFLCounters_type_tag {
   SFLCOUNTERS_ADAPTORS      = 2001, /* host adaptors */
   SFLCOUNTERS_HOST_PAR      = 2002, /* host parent */
   SFLCOUNTERS_HOST_CPU      = 2003, /* host cpu  */
-  SFLCOUNTERS_HOST_MEM      = 2004, /* host memory  */
-  SFLCOUNTERS_HOST_DSK      = 2005, /* host storage I/O  */
-  SFLCOUNTERS_HOST_NIO      = 2006, /* host network I/O */
-  SFLCOUNTERS_HOST_IP       = 2007,
-  SFLCOUNTERS_HOST_ICMP     = 2008,
-  SFLCOUNTERS_HOST_TCP      = 2009,
-  SFLCOUNTERS_HOST_UDP      = 2010,
+  SFLCOUNTERS_HOST_CACHE    = 2004, /* host cpu  */
+  SFLCOUNTERS_HOST_MEM      = 2005, /* host memory  */
+  SFLCOUNTERS_HOST_DSK      = 2006, /* host storage I/O  */
+  SFLCOUNTERS_HOST_NIO      = 2007, /* host network I/O */
+  SFLCOUNTERS_HOST_IP       = 2008,
+  SFLCOUNTERS_HOST_ICMP     = 2009,
+  SFLCOUNTERS_HOST_TCP      = 2010,
+  SFLCOUNTERS_HOST_UDP      = 2011,
   SFLCOUNTERS_HOST_VRT_NODE = 2100, /* host virt node */
   SFLCOUNTERS_HOST_VRT_CPU  = 2101, /* host virt cpu */
   SFLCOUNTERS_HOST_VRT_MEM  = 2102, /* host virt mem */
@@ -1144,6 +1154,7 @@ typedef union _SFLCounters_type {
   SFLHost_hid_counters host_hid;
   SFLAdaptorList *adaptors;
   SFLHost_cpu_counters host_cpu;
+  SFLHost_cache_counters host_cache;
   SFLHost_mem_counters host_mem;
   SFLHost_dsk_counters host_dsk;
   SFLHost_nio_counters host_nio;
